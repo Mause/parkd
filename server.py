@@ -37,8 +37,7 @@ def make_link(date):
     return url_for('index', date=date.isoformat())
 
 
-@app.route('/')
-def index():
+def get_date_from_request():
     date = request.args.get('date')
 
     if date is not None:
@@ -47,12 +46,10 @@ def index():
         except (ValueError, TypeError):
             pass
 
-    if date is None:
-        # fill in missing values with defaults
-        return redirect(
-            url_for('.index', date=Arrow.now().floor('day'))
-        )
+    return date
 
+
+def get_visits_for_date(date):
     res = get_for(date)
     if res:
         _, visits = res
@@ -62,6 +59,21 @@ def index():
 
     else:
         visits = {}
+
+    return visits
+
+
+@app.route('/')
+def index():
+    date = get_date_from_request()
+
+    if date is None:
+        # fill in missing values with defaults
+        return redirect(
+            url_for('.index', date=Arrow.now().floor('day'))
+        )
+
+    visits = get_visits_for_date(date)
 
     one_day = timedelta(days=1)
 
