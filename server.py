@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 from datetime import timedelta
@@ -15,8 +16,11 @@ logging.basicConfig(level=logging.INFO)
 app = flask.Flask(__name__)
 
 
-auth = json.load(open('auth.json'))
-access_token = '{app_id}|{app_secret}'.format_map(auth)
+try:
+    auth = json.load(open('auth.json'))
+    access_token = '{app_id}|{app_secret}'.format_map(auth)
+except FileNotFoundError:
+    access_token = os.environ.get('ACCESS_TOKEN')
 
 
 @lru_cache(10)
@@ -72,4 +76,4 @@ def index():
 
 if __name__ == '__main__':
     app.debug = True
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5000))
