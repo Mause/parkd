@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>Park'D At Curtin</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/normalize.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/skeleton.css') }}">
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+<body>
+
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+    <header>
+        <div class="row" style="margin-top: 10%">
+            <div class="twelve columns">
+                <h2>Park'D At Curtin</h2>
+            </div>
+        </div>
+
+        <nav class="row" style="text-align: center;">
+            <div class="six columns">
+                <hr/>
+                <div class="one-third column">
+                    <a href="{{ prev_page }}">Prev</a>
+                </div>
+                <div class="one-third column">
+                    {{date.strftime('%d/%m/%Y')}}
+                </div>
+                <div class="one-third column">
+                    <a href="{{ next_page }}">Next</a>
+                </div>
+            </div>
+        </nav>
+        <div class="six columns">
+            <hr/>
+        </div>
+        <br/>
+    </header>
+
+    <section>
+        <div style="margin-left:auto; margin-right:auto;">
+            {% for place, subvisits in visits.items() %}
+                <div class="row">
+                    <div class="six columns" style="text-align: center">
+                        <strong>{{ place }}</strong>
+                    </div>
+                </div>
+                {% for visit in subvisits %}
+                    <div class="row" style="margin: 0 auto;">
+                        <div class="six columns" style="text-align: center">
+                            {{ visit }}
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="row">
+                    <div class="six columns">
+                        <hr/>
+                    </div>
+                </div>
+            {% else %}
+                <h5>No stores on campus on this day</h5>
+            {% endfor %}
+        </div>
+    </section>
+  </div>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>
