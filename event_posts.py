@@ -6,7 +6,7 @@ from itertools import islice
 from operator import itemgetter
 
 from dateutil.parser import parse
-from ics import Calendar, Event
+# from ics import Calendar, Event
 from arrow import Arrow
 import requests
 
