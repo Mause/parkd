@@ -10,6 +10,7 @@ from collections import namedtuple
 import flask
 from arrow import Arrow
 from arrow import get as get_date
+from arrow.parser import ParserError
 from flask import request, redirect, url_for, render_template, abort, jsonify
 from event_posts import get_dates as get_dates
 
@@ -48,9 +49,15 @@ def get_date_from_request():
 
     if date is not None:
         try:
-            date = get_date(date).floor('day')
-        except (ValueError, TypeError):
+            date = get_date(date)
+        except (ValueError, TypeError, ParserError):
             pass
+
+    if date == 'today':
+        date = Arrow.now()
+
+    if date is not None:
+        date = date.floor('day')
 
     return date
 
