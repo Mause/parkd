@@ -57,6 +57,11 @@
                     <a href="{{ next_page }}">Next</a>
                 </div>
             </div>
+            <div class="six columns offset-by-three">
+                {% if not is_today %}
+                    <a href="{{ url_for('index', date='today') }}">Today</a>
+                {% endif %}
+            </div>
         </nav>
         <div class="six columns offset-by-three">
             <hr/>
