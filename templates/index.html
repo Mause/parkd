@@ -21,6 +21,7 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/normalize.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/skeleton.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -33,14 +34,14 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <div class="container">
     <header>
-        <div class="row" style="margin-top: 10%">
+        <div class="row" style="margin-top: 10%; text-align: center;">
             <div class="twelve columns">
                 <h2>Park'D At Curtin</h2>
             </div>
         </div>
 
         <nav class="row" style="text-align: center;">
-            <div class="six columns">
+            <div class="six columns offset-by-three">
                 <hr/>
                 <div class="one-third column">
                     <a href="{{ prev_page }}">Prev</a>
@@ -53,37 +54,35 @@
                 </div>
             </div>
         </nav>
-        <div class="six columns">
+        <div class="six columns offset-by-three">
             <hr/>
         </div>
-        <div class="six columns"></div>
+        <div class="six columns offset-by-three"></div>
         <br/>
     </header>
 
     <section>
-        <div style="margin-left:auto; margin-right:auto;">
-            {% for place, subvisits in visits.items() %}
-                <div class="row">
-                    <div class="six columns" style="text-align: center">
-                        <strong>{{ place }}</strong>
+        {% for place, subvisits in visits.items() %}
+            <div class="row">
+                <div class="six columns offset-by-three" style="text-align: center">
+                    <strong>{{ place }}</strong>
+                </div>
+            </div>
+            {% for visit in subvisits %}
+                <div class="row" style="margin: 0 auto;">
+                    <div class="six columns offset-by-three" style="text-align: center">
+                        {{ visit }}
                     </div>
                 </div>
-                {% for visit in subvisits %}
-                    <div class="row" style="margin: 0 auto;">
-                        <div class="six columns" style="text-align: center">
-                            {{ visit }}
-                        </div>
-                    </div>
-                {% endfor %}
-                <div class="row">
-                    <div class="six columns">
-                        <hr/>
-                    </div>
-                </div>
-            {% else %}
-                <h5>No stores on campus on this day</h5>
             {% endfor %}
-        </div>
+            <div class="row">
+                <div class="six columns offset-by-three">
+                    <hr/>
+                </div>
+            </div>
+        {% else %}
+            <h5>No stores on campus on this day</h5>
+        {% endfor %}
     </section>
   </div>
 
