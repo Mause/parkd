@@ -47,7 +47,11 @@
                     <a href="{{ prev_page }}">Prev</a>
                 </div>
                 <div class="one-third column">
-                    {{date.strftime('%d/%m/%Y')}}
+                    {% if is_today %}
+                        Today
+                    {% else %}
+                        {{date.strftime('%d/%m/%Y')}}
+                    {% endif %}
                 </div>
                 <div class="one-third column">
                     <a href="{{ next_page }}">Next</a>

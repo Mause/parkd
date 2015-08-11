@@ -105,11 +105,13 @@ def index():
 
     visits = get_visits_for_date(date)
     visits = sorted(visits.items())
+    is_today = date.date() == Arrow.now().date()
 
     return render_template(
         'index.html',
         date=date,
         visits=visits,
+        is_today=is_today,
         next_page=make_link(date + ONE_DAY),
         prev_page=make_link(date - ONE_DAY)
     )
