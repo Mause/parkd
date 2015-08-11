@@ -5,6 +5,7 @@ from datetime import timedelta
 from functools import lru_cache
 from operator import itemgetter
 from itertools import groupby
+from collections import namedtuple
 
 import flask
 from arrow import Arrow
@@ -16,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 app = flask.Flask(__name__)
 
 ONE_DAY = timedelta(days=1)
-
+VisitResult = namedtuple('VisitResult', 'visits,updated')
 
 try:
     auth = json.load(open('auth.json'))
@@ -31,8 +32,11 @@ def get_for(date):
     for week in get_dates(access_token):
         for day, visits in week:
             if day == date:
-                return (day, visits)
-    return None
+                return VisitResult(
+                    visits,      # visits for day
+                    Arrow.now()  # when data was retrieved
+                )
+    return VisitResult([], Arrow.now())
 
 
 def make_link(date, name='index'):
@@ -53,16 +57,15 @@ def get_date_from_request():
 
 def get_visits_for_date(date):
     res = get_for(date)
-    if res:
-        _, visits = res
-        visits = sorted(visits, key=itemgetter(0))
-        visits = groupby(visits, key=itemgetter(0))
-        visits = {k: list(map(itemgetter(1), v)) for k, v in visits}
+    if not res.visits:
+        return res
 
-    else:
-        visits = {}
+    visits, updated = res
+    visits = sorted(res.visits, key=itemgetter(0))
+    visits = groupby(visits, key=itemgetter(0))
+    visits = {k: list(map(itemgetter(1), v)) for k, v in visits}
 
-    return visits
+    return VisitResult(visits, updated)
 
 
 @app.errorhandler(400)
@@ -80,10 +83,11 @@ def index_json():
     if date is None:
         return abort(400, 'Invalid date provided')
 
-    visits = get_visits_for_date(date)
+    visits, updated = get_visits_for_date(date)
 
     return jsonify({
         'date': date.isoformat(),
+        'updated': updated.isoformat(),
         'pagination': {
             "next": make_link(date + ONE_DAY, ".index_json"),
             "prev": make_link(date - ONE_DAY, ".index_json"),
@@ -103,7 +107,7 @@ def index():
             url_for('.index', date=Arrow.now().floor('day'))
         )
 
-    visits = get_visits_for_date(date)
+    visits, updated = get_visits_for_date(date)
     visits = sorted(visits.items())
     is_today = date.date() == Arrow.now().date()
 
@@ -111,6 +115,7 @@ def index():
         'index.html',
         date=date,
         visits=visits,
+        updated=updated,
         is_today=is_today,
         next_page=make_link(date + ONE_DAY),
         prev_page=make_link(date - ONE_DAY)
