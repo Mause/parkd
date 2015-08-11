@@ -1,3 +1,7 @@
 .text_center {
     text-align: center;
 }
+
+.tight_nav > .column {
+    margin-left: 2%;
+}
