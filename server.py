@@ -9,6 +9,7 @@ from collections import namedtuple
 
 import flask
 from arrow import Arrow
+import dateutil.tz as dateutil_tz
 from arrow import get as get_date
 from arrow.parser import ParserError
 from flask import request, redirect, url_for, render_template, abort, jsonify
@@ -18,6 +19,7 @@ logging.basicConfig(level=logging.INFO)
 app = flask.Flask(__name__)
 
 ONE_DAY = timedelta(days=1)
+AU_PERTH = dateutil_tz.gettz('Australia/Perth')
 VisitResult = namedtuple('VisitResult', 'visits,updated')
 
 try:
@@ -35,9 +37,9 @@ def get_for(date):
             if day == date:
                 return VisitResult(
                     visits,      # visits for day
-                    Arrow.now()  # when data was retrieved
+                    Arrow.now(AU_PERTH)  # when data was retrieved
                 )
-    return VisitResult([], Arrow.now())
+    return VisitResult([], Arrow.now(AU_PERTH))
 
 
 def make_link(date, name='index'):
@@ -54,7 +56,7 @@ def get_date_from_request():
             pass
 
     if date == 'today':
-        date = Arrow.now()
+        date = Arrow.now(AU_PERTH)
 
     if date is not None:
         date = date.floor('day')
@@ -111,12 +113,12 @@ def index():
     if date is None:
         # fill in missing values with defaults
         return redirect(
-            url_for('.index', date=Arrow.now().floor('day'))
+            url_for('.index', date=Arrow.now(AU_PERTH).floor('day'))
         )
 
     visits, updated = get_visits_for_date(date)
     visits = sorted(visits.items())
-    is_today = date.date() == Arrow.now().date()
+    is_today = date.date() == Arrow.now(AU_PERTH).date()
 
     return render_template(
         'index.html',
