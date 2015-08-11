@@ -112,9 +112,7 @@ def index():
 
     if date is None:
         # fill in missing values with defaults
-        return redirect(
-            url_for('.index', date=Arrow.now(AU_PERTH).floor('day'))
-        )
+        return redirect(url_for('.index', date='today'))
 
     visits, updated = get_visits_for_date(date)
     visits = sorted(visits.items())
