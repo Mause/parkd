@@ -15,6 +15,8 @@ from event_posts import get_dates as get_dates
 logging.basicConfig(level=logging.INFO)
 app = flask.Flask(__name__)
 
+ONE_DAY = timedelta(days=1)
+
 
 try:
     auth = json.load(open('auth.json'))
@@ -75,14 +77,12 @@ def index():
 
     visits = get_visits_for_date(date)
 
-    one_day = timedelta(days=1)
-
     return render_template(
         'index.html',
         date=date,
         visits=visits,
-        next_page=make_link(date + one_day),
-        prev_page=make_link(date - one_day)
+        next_page=make_link(date + ONE_DAY),
+        prev_page=make_link(date - ONE_DAY)
     )
 
 
