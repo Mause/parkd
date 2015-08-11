@@ -104,6 +104,7 @@ def index():
         )
 
     visits = get_visits_for_date(date)
+    visits = sorted(visits.items())
 
     return render_template(
         'index.html',
