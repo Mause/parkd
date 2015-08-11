@@ -9,7 +9,7 @@ from itertools import groupby
 import flask
 from arrow import Arrow
 from arrow import get as get_date
-from flask import request, redirect, url_for, render_template
+from flask import request, redirect, url_for, render_template, abort, jsonify
 from event_posts import get_dates as get_dates
 
 logging.basicConfig(level=logging.INFO)
@@ -35,8 +35,8 @@ def get_for(date):
     return None
 
 
-def make_link(date):
-    return url_for('index', date=date.isoformat())
+def make_link(date, name='index'):
+    return url_for(name, date=date.isoformat())
 
 
 def get_date_from_request():
@@ -63,6 +63,25 @@ def get_visits_for_date(date):
         visits = {}
 
     return visits
+
+
+@app.route('/index.json')
+def index_json():
+    date = get_date_from_request()
+
+    if date is None:
+        return abort(400)
+
+    visits = get_visits_for_date(date)
+
+    return jsonify({
+        'date': date.isoformat(),
+        'pagination': {
+            "next": make_link(date + ONE_DAY, ".index_json"),
+            "prev": make_link(date - ONE_DAY, ".index_json"),
+        },
+        'visits': visits
+    })
 
 
 @app.route('/')
