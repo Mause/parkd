@@ -65,12 +65,20 @@ def get_visits_for_date(date):
     return visits
 
 
+@app.errorhandler(400)
+def custom400(error):
+    return jsonify({
+        'error': error.description,
+        'status': 1
+    })
+
+
 @app.route('/index.json')
 def index_json():
     date = get_date_from_request()
 
     if date is None:
-        return abort(400)
+        return abort(400, 'Invalid date provided')
 
     visits = get_visits_for_date(date)
 
@@ -80,7 +88,8 @@ def index_json():
             "next": make_link(date + ONE_DAY, ".index_json"),
             "prev": make_link(date - ONE_DAY, ".index_json"),
         },
-        'visits': visits
+        'visits': visits,
+        'status': 0
     })
 
 
