@@ -59,7 +59,11 @@ def get_date_from_request():
         date = Arrow.now(AU_PERTH)
 
     if date is not None:
-        date = date.floor('day')
+        try:
+            date = date.floor('day')
+        except AttributeError:
+            # was invalid and stayed a string
+            date = None
 
     return date
 
