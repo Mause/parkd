@@ -47,3 +47,11 @@
         <h5>No data for stores on campus on this day</h5>
     {% endfor %}
 {% endblock %}
+
+{% block footer_extra %}
+    <div class="row">
+        <div class="six columns offset-by-three text_center">
+            <small>Data last updated at {{ updated.strftime('%H:%M %Z %d/%m/%Y') }}</small>
+        </div>
+    </div>
+{% endblock %}

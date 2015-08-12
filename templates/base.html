@@ -63,11 +63,7 @@
                 <a href="/index.json?date=today">API</a>
             </div>
         </div>
-        <div class="row">
-            <div class="six columns offset-by-three text_center">
-                <small>Data last updated at {{ updated.strftime('%H:%M %Z %d/%m/%Y') }}</small>
-            </div>
-        </div>
+        {% block footer_extra %}{% endblock %}
     </footer>
 
   </div>
