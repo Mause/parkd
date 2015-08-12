@@ -1,115 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+{% extends "base.html" %}
 
-  <!-- Basic Page Needs
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <meta charset="utf-8">
-  <title>Park'D At Curtin</title>
-  <meta name="description" content="">
-  <meta name="author" content="">
-
-  <!-- Mobile Specific Metas
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- FONT
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-
-  <!-- CSS
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/normalize.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/lib/skeleton.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
-
-  <!-- Favicon
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="icon" type="image/png" href="images/favicon.png">
-
-</head>
-<body>
-
-  <!-- Primary Page Layout
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <div class="container">
-    <header>
-        <div class="row text_center" style="margin-top: 10%;">
-            <div class="twelve columns">
-                <h2>Park'D At Curtin</h2>
-            </div>
+{% block nav %}
+    <div class="six columns offset-by-three tight_nav">
+        <hr/>
+        <div class="one-third column">
+            <a href="{{ prev_page }}">Prev</a>
         </div>
+        <div class="one-third column">
+            {% if is_today %}
+                Today
+            {% else %}
+                {{date.strftime('%d/%m/%Y')}}
+            {% endif %}
+        </div>
+        <div class="one-third column">
+            <a href="{{ next_page }}">Next</a>
+        </div>
+    </div>
+    <div class="six columns offset-by-three">
+        {% if not is_today %}
+            <a href="{{ url_for('index', date='today') }}">Today</a>
+        {% endif %}
+    </div>
+{% endblock %}
 
-        <nav class="row text_center">
-            <div class="six columns offset-by-three tight_nav">
-                <hr/>
-                <div class="one-third column">
-                    <a href="{{ prev_page }}">Prev</a>
-                </div>
-                <div class="one-third column">
-                    {% if is_today %}
-                        Today
-                    {% else %}
-                        {{date.strftime('%d/%m/%Y')}}
-                    {% endif %}
-                </div>
-                <div class="one-third column">
-                    <a href="{{ next_page }}">Next</a>
-                </div>
-            </div>
+{% block content %}
+    {% for place, subvisits in visits %}
+        <div class="row">
             <div class="six columns offset-by-three">
-                {% if not is_today %}
-                    <a href="{{ url_for('index', date='today') }}">Today</a>
-                {% endif %}
+                <strong>{{ place }}</strong>
             </div>
-        </nav>
-        <div class="six columns offset-by-three">
-            <hr/>
         </div>
-        <div class="six columns offset-by-three"></div>
-        <br/>
-    </header>
-
-    <section class="text_center">
-        {% for place, subvisits in visits %}
+        {% for visit in subvisits %}
             <div class="row">
                 <div class="six columns offset-by-three">
-                    <strong>{{ place }}</strong>
+                    {{ visit }}
                 </div>
             </div>
-            {% for visit in subvisits %}
-                <div class="row">
-                    <div class="six columns offset-by-three">
-                        {{ visit }}
-                    </div>
-                </div>
-            {% endfor %}
-            <div class="row">
-                <div class="six columns offset-by-three">
-                    <hr/>
-                </div>
-            </div>
-        {% else %}
-            <h5>No data for stores on campus on this day</h5>
         {% endfor %}
-    </section>
-
-    <footer>
         <div class="row">
-            <div class="six columns offset-by-three text_center">
-                <a href="/index.json?date=today">API</a>
+            <div class="six columns offset-by-three">
+                <hr/>
             </div>
         </div>
-        <div class="row">
-            <div class="six columns offset-by-three text_center">
-                <small>Data last updated at {{ updated.strftime('%H:%M %Z %d/%m/%Y') }}</small>
-            </div>
-        </div>
-    </footer>
-
-  </div>
-
-<!-- End Document
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-</body>
-</html>
+    {% else %}
+        <h5>No data for stores on campus on this day</h5>
+    {% endfor %}
+{% endblock %}
