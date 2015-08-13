@@ -49,6 +49,10 @@ def get_date_posts(access_token):
             # odd. why does this post not have a message?
             continue
 
+        if 'food truck schedule' not in post['message']:
+            # misc or entertainment post
+            continue
+
         # ignore that which has nothing to do with what we need
         lines = post['message'].splitlines()
         for idx, line in enumerate(lines):
