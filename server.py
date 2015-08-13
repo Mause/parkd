@@ -71,7 +71,7 @@ def get_date_from_request():
 def get_visits_for_date(date):
     res = get_for(date)
     if not res.visits:
-        return res
+        return VisitResult({}, res.updated)
 
     visits, updated = res
     visits = sorted(res.visits, key=itemgetter(0))
