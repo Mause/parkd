@@ -49,7 +49,7 @@ def get_date_posts(access_token):
             # odd. why does this post not have a message?
             continue
 
-        if 'food truck schedule' not in post['message']:
+        if 'food truck' not in post['message']:
             # misc or entertainment post
             continue
 
