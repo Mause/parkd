@@ -2,7 +2,6 @@ import os
 import json
 import logging
 from datetime import timedelta
-from functools import lru_cache
 from operator import itemgetter
 from itertools import groupby
 from collections import namedtuple
@@ -29,7 +28,6 @@ except FileNotFoundError:
     access_token = os.environ.get('ACCESS_TOKEN')
 
 
-@lru_cache(10)
 def get_for(date):
     date = date.replace(tzinfo='utc')
     for week in get_dates(access_token):
@@ -40,6 +38,20 @@ def get_for(date):
                     Arrow.now(AU_PERTH)  # when data was retrieved
                 )
     return VisitResult([], Arrow.now(AU_PERTH))
+
+
+def cached_get_for(date):
+    if not hasattr(cached_get_for, '_cache'):
+        cached_get_for._cache = {}
+
+    if date in cached_get_for._cache:
+        data, timestamp = cached_get_for._cache[date]
+
+        if (Arrow.now() - timestamp) < timedelta(hours=1):
+            return data
+
+    cached_get_for._cache[date] = (get_for(date), Arrow.now())
+    return cached_get_for._cache[date][0]
 
 
 def make_link(date, name='index'):
@@ -69,7 +81,7 @@ def get_date_from_request():
 
 
 def get_visits_for_date(date):
-    res = get_for(date)
+    res = cached_get_for(date)
     if not res.visits:
         return VisitResult({}, res.updated)
 
