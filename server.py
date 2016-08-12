@@ -82,7 +82,8 @@ def get_date_from_request():
 
 
 def get_visits_for_date(date):
-    res = cached_get_for(date)
+    # res = cached_get_for(date)
+    res = get_for(date)
     if not res.visits:
         return VisitResult({}, res.updated)
 
