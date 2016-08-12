@@ -39,10 +39,13 @@ def parse_locations(locations):
 
 def get_dates(_):
     days = parse_days(get_content())
-    return (
+    # we used to be able to support previous weeks; each item is a week
+    return [
         (
-            Arrow.fromdatetime(parse(day)),
-            parse_locations(locations)
+            (
+                Arrow.fromdatetime(parse(day)),
+                parse_locations(locations)
+            )
+            for day, locations in days
         )
-        for day, locations in days
-    )
+    ]
