@@ -12,7 +12,8 @@ import dateutil.tz as dateutil_tz
 from arrow import get as get_date
 from arrow.parser import ParserError
 from flask import request, redirect, url_for, render_template, abort, jsonify
-from event_posts import get_dates as get_dates
+
+from via_website import get_dates
 
 logging.basicConfig(level=logging.INFO)
 app = flask.Flask(__name__)
