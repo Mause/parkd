@@ -7,7 +7,7 @@ from lxml.html import fromstring
 from dateutil.parser import parse
 
 URL = 'http://news.curtin.edu.au/events/parkd-curtin/'
-ENDASH_RE = re.compile(b'\xe2\x80\x93'.decode())
+ENDASH = b'\xe2\x80\x93'.decode()
 
 
 def get_content():
@@ -31,7 +31,15 @@ def parse_days(content):
 
 def parse_locations(locations):
     for location in locations:
-        location, visits = map(str.strip, ENDASH_RE.split(location))
+        location = location.split(
+            ENDASH
+            if ENDASH in location
+            else
+            '-',
+            1
+        )
+
+        location, visits = map(str.strip, location)
 
         for visit in visits.replace('\xa0', ' ').split(', '):
             yield (location, visit.strip())
