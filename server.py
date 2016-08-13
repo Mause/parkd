@@ -20,6 +20,7 @@ app = flask.Flask(__name__)
 
 ONE_DAY = timedelta(days=1)
 AU_PERTH = dateutil_tz.gettz('Australia/Perth')
+LOCATIONS = json.load(open('locations.json'))
 VisitResult = namedtuple('VisitResult', 'visits,updated')
 
 try:
@@ -140,6 +141,7 @@ def index():
         'index.html',
         date=date,
         visits=visits,
+        locations=LOCATIONS,
         updated=updated,
         is_today=is_today,
         next_page=make_link(date + ONE_DAY),
