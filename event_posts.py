@@ -94,10 +94,10 @@ def parse_week(days):
         if day_name.lower() not in DAYS:
             continue
 
-        yield ((
+        yield (
             arrow_parse(date),
             list(parse_day(day))
-        ))
+        )
 
 
 def get_dates(access_token):

@@ -89,7 +89,7 @@ def get_visits_for_date(date):
         return VisitResult({}, res.updated)
 
     visits, updated = res
-    visits = sorted(res.visits, key=itemgetter(0))
+    visits = sorted(visits, key=itemgetter(0))
     visits = groupby(visits, key=itemgetter(0))
     visits = {k: list(map(itemgetter(1), v)) for k, v in visits}
 

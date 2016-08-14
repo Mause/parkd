@@ -1,4 +1,3 @@
-import re
 import calendar
 
 import requests
