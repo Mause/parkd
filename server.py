@@ -4,7 +4,7 @@ import logging
 from datetime import timedelta
 from operator import itemgetter
 from itertools import groupby
-from collections import namedtuple
+from collections import namedtuple, UserDict
 
 import flask
 from arrow import Arrow
@@ -19,6 +19,7 @@ logging.basicConfig(level=logging.INFO)
 app = flask.Flask(__name__)
 
 ONE_DAY = timedelta(days=1)
+ONE_HOUR = timedelta(hours=1)
 AU_PERTH = dateutil_tz.gettz('Australia/Perth')
 LOCATIONS = json.load(open('locations.json'))
 VisitResult = namedtuple('VisitResult', 'visits,updated')
@@ -42,9 +43,31 @@ def get_for(date):
     return VisitResult([], Arrow.now(AU_PERTH))
 
 
+class TimeCache(UserDict):
+    def __init__(self, max_age, factory):
+        super().__init__()
+        self.max_age = max_age
+        self.factory = factory
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, (Arrow.now(), value))
+
+    def __getitem__(self, key):
+        try:
+            timestamp, value = super().__getitem__(key)
+        except KeyError:
+            regen = True
+        else:
+            regen = (Arrow.now() - timestamp) > self.max_age
+
+        if regen:
+            logging.info('Regenerating')
+            self[key] = value = self.factory(key)
+
+        return value
 
 
-
+cached_get_for = TimeCache(ONE_HOUR, get_for).get
 
 
 def make_link(date, name='index'):
@@ -74,8 +97,7 @@ def get_date_from_request():
 
 
 def get_visits_for_date(date):
-    # res = cached_get_for(date)
-    res = get_for(date)
+    res = cached_get_for(date)
     if not res.visits:
         return VisitResult({}, res.updated)
 
