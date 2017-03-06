@@ -61,8 +61,10 @@ class TimeCache(UserDict):
             regen = (Arrow.now() - timestamp) > self.max_age
 
         if regen:
-            logging.info('Regenerating')
+            logging.info('Regenerating for %s', key)
             self[key] = value = self.factory(key)
+        else:
+            logging.info('Not regenerating for %s', key)
 
         return value
 
