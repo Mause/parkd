@@ -66,6 +66,8 @@ class TimeCache(UserDict):
         else:
             logging.info('Not regenerating for %s', key)
 
+        logging.info('Visits: %d', len(value.visits))
+
         return value
 
 
@@ -101,6 +103,7 @@ def get_date_from_request():
 def get_visits_for_date(date):
     res = cached_get_for(date)
     if not res.visits:
+        logging.info('No visits available?')
         return VisitResult({}, res.updated)
 
     visits, updated = res
