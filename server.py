@@ -42,18 +42,9 @@ def get_for(date):
     return VisitResult([], Arrow.now(AU_PERTH))
 
 
-def cached_get_for(date):
-    if not hasattr(cached_get_for, '_cache'):
-        cached_get_for._cache = {}
 
-    if date in cached_get_for._cache:
-        data, timestamp = cached_get_for._cache[date]
 
-        if (Arrow.now() - timestamp) < timedelta(hours=1):
-            return data
 
-    cached_get_for._cache[date] = (get_for(date), Arrow.now())
-    return cached_get_for._cache[date][0]
 
 
 def make_link(date, name='index'):
