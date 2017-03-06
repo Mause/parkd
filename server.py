@@ -21,7 +21,8 @@ app = flask.Flask(__name__)
 ONE_DAY = timedelta(days=1)
 ONE_HOUR = timedelta(hours=1)
 AU_PERTH = dateutil_tz.gettz('Australia/Perth')
-LOCATIONS = json.load(open('locations.json'))
+with open('locations.json') as fh:
+    LOCATIONS = json.load(fh)
 VisitResult = namedtuple('VisitResult', 'visits,updated')
 
 try:
