@@ -1,3 +1,5 @@
+import os
+import json
 try:
     auth = json.load(open('auth.json'))
     access_token = '{app_id}|{app_secret}'.format_map(auth)
