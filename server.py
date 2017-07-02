@@ -108,11 +108,14 @@ def get_visits_for_date(date):
         return VisitResult({}, res.updated)
 
     visits, updated = res
-    visits = sorted(visits, key=itemgetter(0))
-    visits = groupby(visits, key=itemgetter(0))
-    visits = {k: list(map(itemgetter(1), v)) for k, v in visits}
 
-    return VisitResult(visits, updated)
+    # <group by location>
+    sorted_visits = defaultdict(list)
+    for location, visit in visits:
+        sorted_visits[location].append(visit)
+    # </group by location>
+
+    return VisitResult(sorted_visits, updated)
 
 
 @app.errorhandler(400)
