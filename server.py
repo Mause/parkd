@@ -13,6 +13,7 @@ from arrow import get as get_date
 from arrow.parser import ParserError
 from flask import request, redirect, url_for, render_template, abort, jsonify
 
+from config import access_token
 from via_website import get_dates
 
 logging.basicConfig(level=logging.INFO)
@@ -24,12 +25,6 @@ AU_PERTH = dateutil_tz.gettz('Australia/Perth')
 with open('locations.json') as fh:
     LOCATIONS = json.load(fh)
 VisitResult = namedtuple('VisitResult', 'visits,updated')
-
-try:
-    auth = json.load(open('auth.json'))
-    access_token = '{app_id}|{app_secret}'.format_map(auth)
-except FileNotFoundError:
-    access_token = os.environ.get('ACCESS_TOKEN')
 
 
 def get_for(date):
