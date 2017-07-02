@@ -2,9 +2,7 @@ import os
 import json
 import logging
 from datetime import timedelta
-from operator import itemgetter
-from itertools import groupby
-from collections import namedtuple, UserDict
+from collections import namedtuple, UserDict, defaultdict
 
 import flask
 from arrow import Arrow
