@@ -4,7 +4,9 @@ import logging
 from datetime import timedelta
 from collections import namedtuple, UserDict, defaultdict
 
+import dill
 import flask
+import bmemcached
 from arrow import Arrow
 import dateutil.tz as dateutil_tz
 from arrow import get as get_date
@@ -40,32 +42,65 @@ def get_for(date):
 class TimeCache(UserDict):
     def __init__(self, max_age, factory):
         super().__init__()
+
+        self.mc = bmemcached.Client(
+            os.environ.get(
+                'MEMCACHEDCLOUD_SERVERS',
+                'localhost:11211'
+            ).split(','),
+            os.environ.get(
+                'MEMCACHEDCLOUD_USERNAME',
+                ''
+            ),
+            os.environ.get(
+                'MEMCACHEDCLOUD_PASSWORD',
+                ''
+            ),
+            pickler=dill.Pickler,
+            unpickler=dill.Unpickler
+        )
+
         self.max_age = max_age
         self.factory = factory
 
     def __setitem__(self, key, value):
-        super().__setitem__(key, (Arrow.now(), value))
+        key = key.isoformat()
+        self.mc.set('permanent-' + key, value)
+        self.mc.set('transient-' + key, value, self.max_age)
 
     def __getitem__(self, key):
-        try:
-            timestamp, value = super().__getitem__(key)
-        except KeyError:
-            regen = True
-        else:
-            regen = (Arrow.now() - timestamp) > self.max_age
+        p = 'permanent-' + key.isoformat()
+        t = 'transient-' + key.isoformat()
+        res = self.mc.get_multi([p, t])
+        permanent_value = res.get(p)
+        transient_value = res.get(t)
 
-        if regen:
+        if not transient_value:
             logging.info('Regenerating for %s', key)
-            self[key] = value = self.factory(key)
-        else:
-            logging.info('Not regenerating for %s', key)
+            transient_value = self.factory(key)
+            if transient_value.visits:
+                logging.info("Was able to refresh data for %s", key)
+                self[key] = transient_value
+            elif permanent_value:
+                logging.info(
+                    "Couldn't refresh for %s, using permanent value",
+                    key
+                )
+                transient_value = permanent_value
+            else:
+                logging.info(
+                    "Data not available from the website or the cache"
+                )
 
-        logging.info('Visits: %d', len(value.visits))
+        logging.info(
+            'Visits: %d',
+            len(transient_value.visits)
+        )
 
-        return value
+        return transient_value
 
 
-cached_get_for = TimeCache(ONE_HOUR, get_for).get
+cached_get_for = TimeCache(int(ONE_HOUR.total_seconds()), get_for).get
 
 
 def make_link(date, name='index'):
