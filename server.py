@@ -106,7 +106,7 @@ cached_get_for = TimeCache(int(ONE_HOUR.total_seconds()), get_for).get
 
 
 def make_link(date, name='index'):
-    return url_for(name, date=date.isoformat())
+    return url_for(name, date=date.isoformat(), _external=True)
 
 
 def get_date_from_request():
