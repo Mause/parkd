@@ -75,8 +75,10 @@ class TimeCache(UserDict):
         permanent_value = res.get(p)
         transient_value = res.get(t)
 
-        if not transient_value:
-            logging.info('Regenerating for %s', key)
+        if transient_value:
+            logging.info('Transient value for %s is ok', key)
+        else:
+            logging.info('Trying to refresh for %s', key)
             transient_value = self.factory(key)
             if transient_value.visits:
                 logging.info("Was able to refresh data for %s", key)
