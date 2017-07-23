@@ -68,43 +68,42 @@ class TimeCache(UserDict):
         self.mc.set('permanent-' + key, value)
         self.mc.set('transient-' + key, value, self.max_age)
 
+    def try_transient(self, key):
+        return self.mc.get('transient-' + key.isoformat())
+
+    def try_refresh(self, key):
+        return self.factory(key)
+
+    def try_permanent(self, key):
+        return self.mc.get('permanent-' + key.isoformat())
+
     def __getitem__(self, key):
         logging.info('Resolving for %s', key)
 
-        p = 'permanent-' + key.isoformat()
-        t = 'transient-' + key.isoformat()
-        res = self.mc.get_multi([p, t])
-        permanent_value = res.get(p)
-        transient_value = res.get(t)
 
-        logging.info('Transient available: %s', bool(transient_value))
-        logging.info('Permanent available: %s', bool(permanent_value))
+        funcs = [
+            self.try_transient,
+            self.try_refresh,
+            self.try_permanent
+        ]
 
-        if transient_value:
-            logging.info('Transient value for %s is ok', key)
-        else:
-            logging.info('Trying to refresh for %s', key)
-            transient_value = self.factory(key)
-            if transient_value.visits:
-                logging.info("Was able to refresh data for %s", key)
-                self[key] = transient_value
-            elif permanent_value:
-                logging.info(
-                    "Couldn't refresh for %s, using permanent value",
-                    key
-                )
-                transient_value = permanent_value
-            else:
-                logging.info(
-                    "Data not available from the website or the cache"
-                )
+        for func in funcs:
+            name = func.__name__[4:].title()
+
+            logging.info('Trying %s', name)
+            value = func(key)
+
+            if value:
+                logging.info('%s succeeded', name)
+                logging.info('Visits: %d', len(value.visits))
+                self[key] = value  # cache it!
+                return value
 
         logging.info(
-            'Visits: %d',
-            len(transient_value.visits)
+            "Data not available from the website or the cache"
         )
 
-        return transient_value
+        return value
 
 
 cached_get_for = TimeCache(int(ONE_HOUR.total_seconds()), get_for).get
@@ -138,7 +137,7 @@ def get_date_from_request():
 
 def get_visits_for_date(date):
     res = cached_get_for(date)
-    if not res.visits:
+    if not (res and res.visits):
         logging.info('No visits available?')
         return VisitResult({}, res.updated)
 
