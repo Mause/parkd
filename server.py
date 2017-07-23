@@ -93,7 +93,7 @@ class TimeCache(UserDict):
             logging.info('Trying %s', name)
             value = func(key)
 
-            if value:
+            if value and value.visits:
                 logging.info('%s succeeded', name)
                 logging.info('Visits: %d', len(value.visits))
                 self[key] = value  # cache it!
