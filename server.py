@@ -69,11 +69,16 @@ class TimeCache(UserDict):
         self.mc.set('transient-' + key, value, self.max_age)
 
     def __getitem__(self, key):
+        logging.info('Resolving for %s', key)
+
         p = 'permanent-' + key.isoformat()
         t = 'transient-' + key.isoformat()
         res = self.mc.get_multi([p, t])
         permanent_value = res.get(p)
         transient_value = res.get(t)
+
+        logging.info('Transient available: %s', bool(transient_value))
+        logging.info('Permanent available: %s', bool(permanent_value))
 
         if transient_value:
             logging.info('Transient value for %s is ok', key)
