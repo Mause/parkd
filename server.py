@@ -87,6 +87,9 @@ class TimeCache(UserDict):
             self.try_permanent
         ]
 
+        # default
+        value = VisitResult([], Arrow.now(AU_PERTH))
+
         for func in funcs:
             name = func.__name__[4:].title()
 
@@ -137,7 +140,7 @@ def get_date_from_request():
 
 def get_visits_for_date(date):
     res = cached_get_for(date)
-    if not (res and res.visits):
+    if not res.visits:
         logging.info('No visits available?')
         return VisitResult({}, res.updated)
 
