@@ -27,20 +27,8 @@ with open('locations.json') as fh:
 VisitResult = namedtuple('VisitResult', 'visits,updated')
 
 
-def get_for(date):
-    date = date.replace(tzinfo='utc')
-    for week in get_dates(access_token):
-        for day, visits in week:
-            if day == date:
-                return VisitResult(
-                    visits,      # visits for day
-                    Arrow.now(AU_PERTH)  # when data was retrieved
-                )
-    return VisitResult([], Arrow.now(AU_PERTH))
-
-
 class TimeCache():
-    def __init__(self, max_age, factory):
+    def __init__(self, max_age):
         self.mc = bmemcached.Client(
             os.environ.get(
                 'MEMCACHEDCLOUD_SERVERS',
@@ -59,7 +47,6 @@ class TimeCache():
         )
 
         self.max_age = max_age
-        self.factory = factory
 
     def set(self, key, value):
         key = key.isoformat()
@@ -69,8 +56,24 @@ class TimeCache():
     def try_transient(self, key):
         return self.mc.get('transient-' + key.isoformat())
 
-    def try_refresh(self, key):
-        return self.factory(key)
+    def try_refresh(self, date):
+        date = date.replace(tzinfo='utc')
+        weeks = get_dates(access_token)
+
+        dates = {
+            day: VisitResult(
+                list(visits),        # visits for day
+                Arrow.now(AU_PERTH)  # when data was retrieved
+            )
+            for week in weeks
+            for day, visits in week
+        }
+
+        # cache everything we're given
+        for day, visits in dates.items():
+            self.set(day, visits)
+
+        return dates.get(date)
 
     def try_permanent(self, key):
         return self.mc.get('permanent-' + key.isoformat())
@@ -84,7 +87,6 @@ class TimeCache():
             self.try_refresh,
             self.try_permanent
         ]
-
 
         for func in funcs:
             name = func.__name__[4:].title()
@@ -106,7 +108,7 @@ class TimeCache():
         return VisitResult([], Arrow.now(AU_PERTH))
 
 
-cached_get_for = TimeCache(int(ONE_HOUR.total_seconds()), get_for).get
+cached_get_for = TimeCache(int(ONE_HOUR.total_seconds())).get
 
 
 def make_link(date, name='index'):
