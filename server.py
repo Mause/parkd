@@ -50,6 +50,7 @@ class TimeCache():
 
     def set(self, key, value):
         key = key.isoformat()
+        logging.info('Writing data for %s to cache', key)
         self.mc.set('permanent-' + key, value)
         self.mc.set('transient-' + key, value, self.max_age)
 
