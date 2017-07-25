@@ -87,8 +87,6 @@ class TimeCache(UserDict):
             self.try_permanent
         ]
 
-        # default
-        value = VisitResult([], Arrow.now(AU_PERTH))
 
         for func in funcs:
             name = func.__name__[4:].title()
@@ -106,7 +104,8 @@ class TimeCache(UserDict):
             "Data not available from the website or the cache"
         )
 
-        return value
+        # default
+        return VisitResult([], Arrow.now(AU_PERTH))
 
 
 cached_get_for = TimeCache(int(ONE_HOUR.total_seconds()), get_for).get
