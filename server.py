@@ -97,8 +97,12 @@ class TimeCache():
 
             if value and value.visits:
                 logging.info('%s succeeded', name)
+
                 logging.info('Visits: %d', len(value.visits))
-                self.set(key, value)  # cache it!
+
+                if name != 'transient':
+                    self.set(key, value)  # cache it!
+
                 return value
 
         logging.info(
