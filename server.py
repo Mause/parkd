@@ -2,7 +2,7 @@ import os
 import json
 import logging
 from datetime import timedelta
-from collections import namedtuple, UserDict, defaultdict
+from collections import namedtuple, defaultdict
 
 import dill
 import flask
@@ -39,10 +39,8 @@ def get_for(date):
     return VisitResult([], Arrow.now(AU_PERTH))
 
 
-class TimeCache(UserDict):
+class TimeCache():
     def __init__(self, max_age, factory):
-        super().__init__()
-
         self.mc = bmemcached.Client(
             os.environ.get(
                 'MEMCACHEDCLOUD_SERVERS',
@@ -63,7 +61,7 @@ class TimeCache(UserDict):
         self.max_age = max_age
         self.factory = factory
 
-    def __setitem__(self, key, value):
+    def set(self, key, value):
         key = key.isoformat()
         self.mc.set('permanent-' + key, value)
         self.mc.set('transient-' + key, value, self.max_age)
@@ -77,7 +75,7 @@ class TimeCache(UserDict):
     def try_permanent(self, key):
         return self.mc.get('permanent-' + key.isoformat())
 
-    def __getitem__(self, key):
+    def get(self, key):
         logging.info('Resolving for %s', key)
 
 
@@ -97,7 +95,7 @@ class TimeCache(UserDict):
             if value and value.visits:
                 logging.info('%s succeeded', name)
                 logging.info('Visits: %d', len(value.visits))
-                self[key] = value  # cache it!
+                self.set(key, value)  # cache it!
                 return value
 
         logging.info(
