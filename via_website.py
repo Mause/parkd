@@ -18,14 +18,21 @@ def get_content():
 
 
 def parse_days(content):
-    for h2 in content.xpath('.//h2'):
-        ul = h2.getnext()
+    h2 = content.xpath('.//h2')[0]
+    nbsp = content.xpath('.//p[text()="\xa0"]')[0]
+    els = content[content.index(h2):content.index(nbsp)]
 
-        title = h2.text
-        if not title or title.split()[0] not in calendar.day_name:
-            continue
+    stack = []
+    for el in els:
+        if el.tag == 'h2':
+            stack.append([])
+        stack[-1].append(el)
 
-        yield h2.text, [li.text for li in ul.xpath('.//li')]
+    stack.pop(0)  # ignore prelude
+
+    for section in stack:
+        h2, *rest = (el.text for el in section)
+        yield h2, rest
 
 
 def parse_locations(locations):
